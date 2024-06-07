@@ -12,6 +12,8 @@ public:
     void OnPaint(wxPaintEvent& event);
 
 private:
+    int gridSize = 15;  // Default grid size
+
     wxDECLARE_EVENT_TABLE();
 };
 

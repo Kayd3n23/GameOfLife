@@ -32,8 +32,16 @@ void DrawingPanel::OnPaint(wxPaintEvent& event)
     context->SetPen(*wxBLACK);
     context->SetBrush(*wxWHITE);
 
-    // Draw a rectangle (example)
-    context->DrawRectangle(50, 50, 100, 100);
+    int cellSize = 10;  // Size of each cell
+    for (int row = 0; row < gridSize; ++row)
+    {
+        for (int col = 0; col < gridSize; ++col)
+        {
+            int x = col * cellSize;
+            int y = row * cellSize;
+            context->DrawRectangle(x, y, cellSize, cellSize);
+        }
+    }
 
     delete context;
 }
