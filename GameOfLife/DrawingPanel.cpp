@@ -32,14 +32,23 @@ void DrawingPanel::OnPaint(wxPaintEvent& event)
     context->SetPen(*wxBLACK);
     context->SetBrush(*wxWHITE);
 
-    int cellSize = 10;  // Size of each cell
+    // Get the size of the drawing panel
+    wxSize panelSize = GetClientSize();
+    int panelWidth = panelSize.GetWidth();
+    int panelHeight = panelSize.GetHeight();
+
+    // Calculate the size of each cell
+    int cellWidth = panelWidth / gridSize;
+    int cellHeight = panelHeight / gridSize;
+
+    // Draw the grid
     for (int row = 0; row < gridSize; ++row)
     {
         for (int col = 0; col < gridSize; ++col)
         {
-            int x = col * cellSize;
-            int y = row * cellSize;
-            context->DrawRectangle(x, y, cellSize, cellSize);
+            int x = col * cellWidth;
+            int y = row * cellHeight;
+            context->DrawRectangle(x, y, cellWidth, cellHeight);
         }
     }
 
