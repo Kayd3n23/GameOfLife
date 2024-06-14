@@ -1,3 +1,4 @@
+// MainWindow.cpp
 #include "MainWindow.h"
 
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
@@ -13,11 +14,29 @@ MainWindow::MainWindow()
     sizer->Add(drawingPanel, 1, wxEXPAND | wxALL, 5);
     this->SetSizer(sizer);
     this->Layout(); // Ensure layout is updated
+
+    InitializeGrid(); // Initialize the game grid
 }
 
 MainWindow::~MainWindow()
 {
     // Destructor
+}
+
+void MainWindow::InitializeGrid()
+{
+    // Resize the game board to gridSize x gridSize
+    gameBoard.resize(gridSize);
+    for (int i = 0; i < gridSize; ++i)
+    {
+        gameBoard[i].resize(gridSize, false); // Initialize all cells to false (dead)
+    }
+
+    // Set grid size in DrawingPanel
+    drawingPanel->SetGridSize(gridSize);
+
+    // Refresh DrawingPanel to reflect changes
+    drawingPanel->Refresh();
 }
 
 void MainWindow::OnSizeChange(wxSizeEvent& event)

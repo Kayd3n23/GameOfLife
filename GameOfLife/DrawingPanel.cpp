@@ -1,3 +1,4 @@
+// DrawingPanel.cpp
 #include "DrawingPanel.h"
 #include "wx/graphics.h"
 #include "wx/dcbuffer.h"
@@ -58,5 +59,11 @@ void DrawingPanel::OnPaint(wxPaintEvent& event)
 void DrawingPanel::SetSize(const wxSize& size)
 {
     wxPanel::SetSize(size); // Call base class SetSize
+    Refresh(); // Trigger repaint
+}
+
+void DrawingPanel::SetGridSize(int size)
+{
+    gridSize = size;
     Refresh(); // Trigger repaint
 }

@@ -1,3 +1,4 @@
+// DrawingPanel.h
 #ifndef DRAWINGPANEL_H
 #define DRAWINGPANEL_H
 
@@ -10,7 +11,8 @@ public:
     ~DrawingPanel();
 
     void OnPaint(wxPaintEvent& event);
-    void SetSize(const wxSize& size); // New method
+    void SetSize(const wxSize& size); // Method to handle resizing
+    void SetGridSize(int size); // Method to set grid size
 
 private:
     int gridSize = 15;  // Default grid size
