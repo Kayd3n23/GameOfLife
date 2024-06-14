@@ -5,10 +5,11 @@
 
 wxBEGIN_EVENT_TABLE(DrawingPanel, wxPanel)
 EVT_PAINT(DrawingPanel::OnPaint)
+EVT_LEFT_UP(DrawingPanel::OnMouseUp) // Bind the mouse event
 wxEND_EVENT_TABLE()
 
-DrawingPanel::DrawingPanel(wxWindow* parent)
-    : wxPanel(parent, wxID_ANY)
+DrawingPanel::DrawingPanel(wxWindow* parent, std::vector<std::vector<bool>>& gameBoard)
+    : wxPanel(parent, wxID_ANY), gameBoardRef(gameBoard) // Initialize reference
 {
     this->SetBackgroundStyle(wxBG_STYLE_PAINT);
 }
@@ -49,6 +50,13 @@ void DrawingPanel::OnPaint(wxPaintEvent& event)
         {
             int x = col * cellWidth;
             int y = row * cellHeight;
+
+            // Set the brush color based on cell state
+            if (gameBoardRef[row][col])
+                context->SetBrush(*wxBLACK); // Alive cell
+            else
+                context->SetBrush(*wxWHITE); // Dead cell
+
             context->DrawRectangle(x, y, cellWidth, cellHeight);
         }
     }
@@ -66,4 +74,29 @@ void DrawingPanel::SetGridSize(int size)
 {
     gridSize = size;
     Refresh(); // Trigger repaint
+}
+
+void DrawingPanel::OnMouseUp(wxMouseEvent& event)
+{
+    int mouseX = event.GetX();
+    int mouseY = event.GetY();
+
+    wxSize panelSize = GetClientSize();
+    int panelWidth = panelSize.GetWidth();
+    int panelHeight = panelSize.GetHeight();
+
+    // Calculate cell width and height
+    int cellWidth = panelWidth / gridSize;
+    int cellHeight = panelHeight / gridSize;
+
+    // Determine which cell was clicked
+    int col = mouseX / cellWidth;
+    int row = mouseY / cellHeight;
+
+    if (col >= 0 && col < gridSize && row >= 0 && row < gridSize)
+    {
+        // Toggle cell state
+        gameBoardRef[row][col] = !gameBoardRef[row][col];
+        Refresh(); // Trigger repaint
+    }
 }

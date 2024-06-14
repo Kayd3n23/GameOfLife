@@ -8,14 +8,16 @@ wxEND_EVENT_TABLE()
 MainWindow::MainWindow()
     : wxFrame(nullptr, wxID_ANY, "Game of Life", wxPoint(0, 0), wxSize(400, 400)) // Updated size
 {
-    drawingPanel = new DrawingPanel(this);
+    // Initialize grid before creating DrawingPanel
+    InitializeGrid();
+
+    // Create DrawingPanel with gameBoard reference
+    drawingPanel = new DrawingPanel(this, gameBoard);
 
     sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(drawingPanel, 1, wxEXPAND | wxALL, 5);
     this->SetSizer(sizer);
     this->Layout(); // Ensure layout is updated
-
-    InitializeGrid(); // Initialize the game grid
 }
 
 MainWindow::~MainWindow()
@@ -33,10 +35,11 @@ void MainWindow::InitializeGrid()
     }
 
     // Set grid size in DrawingPanel
-    drawingPanel->SetGridSize(gridSize);
-
-    // Refresh DrawingPanel to reflect changes
-    drawingPanel->Refresh();
+    if (drawingPanel) // Check if drawingPanel is already created
+    {
+        drawingPanel->SetGridSize(gridSize);
+        drawingPanel->Refresh();
+    }
 }
 
 void MainWindow::OnSizeChange(wxSizeEvent& event)
