@@ -10,6 +10,7 @@ public:
     ~DrawingPanel();
 
     void OnPaint(wxPaintEvent& event);
+    void SetSize(const wxSize& size); // New method
 
 private:
     int gridSize = 15;  // Default grid size

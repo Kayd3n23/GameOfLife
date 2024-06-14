@@ -54,3 +54,9 @@ void DrawingPanel::OnPaint(wxPaintEvent& event)
 
     delete context;
 }
+
+void DrawingPanel::SetSize(const wxSize& size)
+{
+    wxPanel::SetSize(size); // Call base class SetSize
+    Refresh(); // Trigger repaint
+}

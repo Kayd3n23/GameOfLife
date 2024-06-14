@@ -12,6 +12,11 @@ public:
 
 private:
     DrawingPanel* drawingPanel;
+    wxBoxSizer* sizer;
+
+    void OnSizeChange(wxSizeEvent& event);
+
+    wxDECLARE_EVENT_TABLE();
 };
 
 #endif // MAINWINDOW_H
