@@ -15,10 +15,15 @@ public:
     void OnSizeChange(wxSizeEvent& event);
     void InitializeGrid();
     void UpdateStatusBar();
+    void OnPlay(wxCommandEvent& event);
+    void OnPause(wxCommandEvent& event);
+    void OnNext(wxCommandEvent& event);
+    void OnClear(wxCommandEvent& event);
 
 private:
     DrawingPanel* drawingPanel;
     wxBoxSizer* sizer;
+    wxToolBar* toolBar;
     std::vector<std::vector<bool>> gameBoard;
     int gridSize = 15;
 
