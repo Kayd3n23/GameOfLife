@@ -23,7 +23,6 @@ MainWindow::MainWindow()
     statusBar = CreateStatusBar();
     UpdateStatusBar();
 
-    // Initialize Toolbar
     toolBar = CreateToolBar();
 
     wxBitmap playIcon(play_xpm);
@@ -77,6 +76,33 @@ void MainWindow::UpdateStatusBar()
     statusBar->SetStatusText(status);
 }
 
+int MainWindow::GetLivingNeighbors(int row, int col)
+{
+    int livingNeighbors = 0;
+
+    // Iterate over the 3x3 grid centered on (row, col)
+    for (int i = -1; i <= 1; ++i)
+    {
+        for (int j = -1; j <= 1; ++j)
+        {
+            if (i == 0 && j == 0)
+                continue; // Skip the cell itself
+
+            int newRow = row + i;
+            int newCol = col + j;
+
+            // Ensure indices are within bounds
+            if (newRow >= 0 && newRow < gridSize && newCol >= 0 && newCol < gridSize)
+            {
+                if (gameBoard[newRow][newCol])
+                    ++livingNeighbors;
+            }
+        }
+    }
+
+    return livingNeighbors;
+}
+
 // Toolbar Event Handlers
 void MainWindow::OnPlay(wxCommandEvent& event)
 {
@@ -95,5 +121,12 @@ void MainWindow::OnNext(wxCommandEvent& event)
 
 void MainWindow::OnClear(wxCommandEvent& event)
 {
-    // Implement clear functionality
+    for (auto& row : gameBoard)
+    {
+        std::fill(row.begin(), row.end(), false);
+    }
+    generationCount = 0;
+    livingCellsCount = 0;
+    UpdateStatusBar();
+    drawingPanel->Refresh();
 }
