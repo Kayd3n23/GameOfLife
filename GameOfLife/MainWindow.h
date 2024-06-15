@@ -18,9 +18,10 @@ public:
     void OnPlay(wxCommandEvent& event);
     void OnPause(wxCommandEvent& event);
     void OnNext(wxCommandEvent& event);
-    void OnClear(wxCommandEvent& event);  // Add this method for clear functionality
+    void OnClear(wxCommandEvent& event);
     int GetLivingNeighbors(int row, int col);
     void NextGeneration();
+    void OnTimer(wxTimerEvent& event);  // New timer event handler
 
 private:
     DrawingPanel* drawingPanel;
@@ -32,6 +33,9 @@ private:
     wxStatusBar* statusBar;
     int generationCount = 0;
     int livingCellsCount = 0;
+
+    wxTimer* timer;  // Timer variable
+    int timerInterval = 50;  // Timer interval in milliseconds
 
     wxDECLARE_EVENT_TABLE();
 };

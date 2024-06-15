@@ -10,7 +10,8 @@ EVT_SIZE(MainWindow::OnSizeChange)
 EVT_MENU(10001, MainWindow::OnPlay)
 EVT_MENU(10002, MainWindow::OnPause)
 EVT_MENU(10003, MainWindow::OnNext)
-EVT_MENU(10004, MainWindow::OnClear)  // Add event for clear button
+EVT_MENU(10004, MainWindow::OnClear)
+EVT_TIMER(10005, MainWindow::OnTimer)  // Add event for timer
 wxEND_EVENT_TABLE()
 
 MainWindow::MainWindow()
@@ -41,11 +42,19 @@ MainWindow::MainWindow()
     this->Layout();
 
     InitializeGrid();
+
+    // Initialize the timer
+    timer = new wxTimer(this, 10005);
 }
 
 MainWindow::~MainWindow()
 {
-    // Empty destructor for now
+    // Destructor
+    if (timer)
+    {
+        timer->Stop();
+        delete timer;
+    }
 }
 
 void MainWindow::OnSizeChange(wxSizeEvent& event)
@@ -156,12 +165,12 @@ void MainWindow::NextGeneration()
 
 void MainWindow::OnPlay(wxCommandEvent& event)
 {
-    // Implement play functionality
+    timer->Start(timerInterval);  // Start the timer with the interval
 }
 
 void MainWindow::OnPause(wxCommandEvent& event)
 {
-    // Implement pause functionality
+    timer->Stop();  // Stop the timer
 }
 
 void MainWindow::OnNext(wxCommandEvent& event)
@@ -184,4 +193,9 @@ void MainWindow::OnClear(wxCommandEvent& event)
     // Update the status bar and refresh the panel
     UpdateStatusBar();
     drawingPanel->Refresh();
+}
+
+void MainWindow::OnTimer(wxTimerEvent& event)
+{
+    NextGeneration();  // Call NextGeneration on each timer event
 }
