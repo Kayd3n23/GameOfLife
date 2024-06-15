@@ -10,7 +10,7 @@ EVT_SIZE(MainWindow::OnSizeChange)
 EVT_MENU(10001, MainWindow::OnPlay)
 EVT_MENU(10002, MainWindow::OnPause)
 EVT_MENU(10003, MainWindow::OnNext)
-EVT_MENU(10004, MainWindow::OnClear)
+EVT_MENU(10004, MainWindow::OnClear)  // Add event for clear button
 wxEND_EVENT_TABLE()
 
 MainWindow::MainWindow()
@@ -154,7 +154,6 @@ void MainWindow::NextGeneration()
     drawingPanel->Refresh();
 }
 
-// Toolbar Event Handlers
 void MainWindow::OnPlay(wxCommandEvent& event)
 {
     // Implement play functionality
@@ -172,12 +171,17 @@ void MainWindow::OnNext(wxCommandEvent& event)
 
 void MainWindow::OnClear(wxCommandEvent& event)
 {
+    // Reset the game board
     for (auto& row : gameBoard)
     {
         std::fill(row.begin(), row.end(), false);
     }
+
+    // Reset generation and living cells count
     generationCount = 0;
     livingCellsCount = 0;
+
+    // Update the status bar and refresh the panel
     UpdateStatusBar();
     drawingPanel->Refresh();
 }

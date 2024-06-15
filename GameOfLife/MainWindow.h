@@ -18,9 +18,9 @@ public:
     void OnPlay(wxCommandEvent& event);
     void OnPause(wxCommandEvent& event);
     void OnNext(wxCommandEvent& event);
-    void OnClear(wxCommandEvent& event);
+    void OnClear(wxCommandEvent& event);  // Add this method for clear functionality
     int GetLivingNeighbors(int row, int col);
-    void NextGeneration();  // New method for calculating next generation
+    void NextGeneration();
 
 private:
     DrawingPanel* drawingPanel;
