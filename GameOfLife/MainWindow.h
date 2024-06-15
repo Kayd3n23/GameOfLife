@@ -19,7 +19,8 @@ public:
     void OnPause(wxCommandEvent& event);
     void OnNext(wxCommandEvent& event);
     void OnClear(wxCommandEvent& event);
-    int GetLivingNeighbors(int row, int col); // New method for calculating living neighbors
+    int GetLivingNeighbors(int row, int col);
+    void NextGeneration();  // New method for calculating next generation
 
 private:
     DrawingPanel* drawingPanel;

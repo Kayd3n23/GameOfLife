@@ -103,6 +103,57 @@ int MainWindow::GetLivingNeighbors(int row, int col)
     return livingNeighbors;
 }
 
+void MainWindow::NextGeneration()
+{
+    // Create a sandbox for the next generation
+    std::vector<std::vector<bool>> sandbox(gridSize, std::vector<bool>(gridSize, false));
+
+    // Count the number of living cells
+    int newLivingCellsCount = 0;
+
+    // Iterate over the game board
+    for (int row = 0; row < gridSize; ++row)
+    {
+        for (int col = 0; col < gridSize; ++col)
+        {
+            int livingNeighbors = GetLivingNeighbors(row, col);
+
+            // Apply the rules of the Game of Life
+            if (gameBoard[row][col])
+            {
+                if (livingNeighbors == 2 || livingNeighbors == 3)
+                {
+                    sandbox[row][col] = true; // Cell survives
+                    ++newLivingCellsCount;
+                }
+                else
+                {
+                    sandbox[row][col] = false; // Cell dies
+                }
+            }
+            else
+            {
+                if (livingNeighbors == 3)
+                {
+                    sandbox[row][col] = true; // Cell becomes alive
+                    ++newLivingCellsCount;
+                }
+            }
+        }
+    }
+
+    // Swap the sandbox with the game board
+    std::swap(gameBoard, sandbox);
+
+    // Update generation count and living cells count
+    ++generationCount;
+    livingCellsCount = newLivingCellsCount;
+
+    // Update the status bar and refresh the panel
+    UpdateStatusBar();
+    drawingPanel->Refresh();
+}
+
 // Toolbar Event Handlers
 void MainWindow::OnPlay(wxCommandEvent& event)
 {
@@ -116,7 +167,7 @@ void MainWindow::OnPause(wxCommandEvent& event)
 
 void MainWindow::OnNext(wxCommandEvent& event)
 {
-    // Implement next functionality
+    NextGeneration();
 }
 
 void MainWindow::OnClear(wxCommandEvent& event)
