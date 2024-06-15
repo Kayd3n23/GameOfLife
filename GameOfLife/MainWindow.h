@@ -14,12 +14,17 @@ public:
 
     void OnSizeChange(wxSizeEvent& event);
     void InitializeGrid();
+    void UpdateStatusBar();
 
 private:
     DrawingPanel* drawingPanel;
     wxBoxSizer* sizer;
     std::vector<std::vector<bool>> gameBoard;
     int gridSize = 15;
+
+    wxStatusBar* statusBar;
+    int generationCount = 0;
+    int livingCellsCount = 0;
 
     wxDECLARE_EVENT_TABLE();
 };

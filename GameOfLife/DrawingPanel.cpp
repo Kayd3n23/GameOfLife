@@ -2,6 +2,7 @@
 #include "DrawingPanel.h"
 #include "wx/graphics.h"
 #include "wx/dcbuffer.h"
+#include "MainWindow.h" // Needed to call UpdateStatusBar
 
 wxBEGIN_EVENT_TABLE(DrawingPanel, wxPanel)
 EVT_PAINT(DrawingPanel::OnPaint)
@@ -92,6 +93,14 @@ void DrawingPanel::OnMouseUp(wxMouseEvent& event)
     if (col >= 0 && col < gridSize && row >= 0 && row < gridSize)
     {
         gameBoardRef[row][col] = !gameBoardRef[row][col];
+
+        // Update living cells count
+        MainWindow* parentWindow = dynamic_cast<MainWindow*>(GetParent());
+        if (parentWindow)
+        {
+            parentWindow->UpdateStatusBar();
+        }
+
         Refresh();
     }
 }

@@ -11,7 +11,12 @@ MainWindow::MainWindow()
     sizer = new wxBoxSizer(wxVERTICAL);
     drawingPanel = new DrawingPanel(this, gameBoard);
     sizer->Add(drawingPanel, 1, wxEXPAND | wxALL);
+
+    statusBar = CreateStatusBar();
+    UpdateStatusBar();
+
     this->SetSizer(sizer);
+    this->Layout();
 
     InitializeGrid();
 }
@@ -37,4 +42,11 @@ void MainWindow::InitializeGrid()
     }
 
     drawingPanel->SetGridSize(gridSize);
+}
+
+void MainWindow::UpdateStatusBar()
+{
+    wxString status;
+    status.Printf("Generations: %d | Living Cells: %d", generationCount, livingCellsCount);
+    statusBar->SetStatusText(status);
 }
