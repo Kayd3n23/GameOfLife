@@ -14,11 +14,11 @@ public:
     void OnPaint(wxPaintEvent& event);
     void SetSize(const wxSize& size);
     void SetGridSize(int size);
-    void OnMouseUp(wxMouseEvent& event); // Mouse event handler
+    void OnMouseUp(wxMouseEvent& event);
 
 private:
-    int gridSize = 15;  // Default grid size
-    std::vector<std::vector<bool>>& gameBoardRef; // Reference to game board
+    int gridSize = 15;
+    std::vector<std::vector<bool>>& gameBoardRef;
 
     wxDECLARE_EVENT_TABLE();
 };

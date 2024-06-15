@@ -12,14 +12,14 @@ public:
     MainWindow();
     ~MainWindow();
 
+    void OnSizeChange(wxSizeEvent& event);
+    void InitializeGrid();
+
 private:
     DrawingPanel* drawingPanel;
     wxBoxSizer* sizer;
-    int gridSize = 15; // Default grid size
     std::vector<std::vector<bool>> gameBoard;
-
-    void InitializeGrid(); // Method to initialize the grid
-    void OnSizeChange(wxSizeEvent& event);
+    int gridSize = 15;
 
     wxDECLARE_EVENT_TABLE();
 };
