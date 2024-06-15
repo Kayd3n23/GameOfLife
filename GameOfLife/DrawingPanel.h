@@ -14,7 +14,7 @@ public:
     void OnPaint(wxPaintEvent& event);
     void SetSize(const wxSize& size);
     void SetGridSize(int size);
-    void OnMouseUp(wxMouseEvent& event); // New mouse event handler
+    void OnMouseUp(wxMouseEvent& event); // Mouse event handler
 
 private:
     int gridSize = 15;  // Default grid size

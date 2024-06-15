@@ -30,9 +30,8 @@ void DrawingPanel::OnPaint(wxPaintEvent& event)
         return;
     }
 
-    // Set the pen and brush for drawing
+    // Set the pen for drawing
     context->SetPen(*wxBLACK);
-    context->SetBrush(*wxWHITE);
 
     // Get the size of the drawing panel
     wxSize panelSize = GetClientSize();
@@ -53,9 +52,13 @@ void DrawingPanel::OnPaint(wxPaintEvent& event)
 
             // Set the brush color based on cell state
             if (gameBoardRef[row][col])
-                context->SetBrush(*wxBLACK); // Alive cell
+            {
+                context->SetBrush(*wxLIGHT_GREY); // Alive cell
+            }
             else
+            {
                 context->SetBrush(*wxWHITE); // Dead cell
+            }
 
             context->DrawRectangle(x, y, cellWidth, cellHeight);
         }
