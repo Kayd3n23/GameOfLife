@@ -181,7 +181,7 @@ void MainWindow::OnNext(wxCommandEvent& event)
 void MainWindow::OnClear(wxCommandEvent& event)
 {
     // Reset the game board
-    for (auto& row : gameBoard)
+    for (auto& row : gameBoard) 
     {
         std::fill(row.begin(), row.end(), false);
     }
