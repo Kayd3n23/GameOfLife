@@ -194,7 +194,7 @@ void MainWindow::OnClear(wxCommandEvent& event)
     UpdateStatusBar();
     drawingPanel->Refresh();
 }
-
+ 
 void MainWindow::OnTimer(wxTimerEvent& event)
 {
     NextGeneration();  // Call NextGeneration on each timer event
