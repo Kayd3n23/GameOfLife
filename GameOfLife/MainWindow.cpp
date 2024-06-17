@@ -198,4 +198,4 @@ void MainWindow::OnClear(wxCommandEvent& event)
 void MainWindow::OnTimer(wxTimerEvent& event)
 {
     NextGeneration();  // Call NextGeneration on each timer event
-}
+} 
