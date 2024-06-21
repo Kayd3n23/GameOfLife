@@ -19,8 +19,12 @@ public:
     void OnPause(wxCommandEvent& event);
     void OnNext(wxCommandEvent& event);
     void OnClear(wxCommandEvent& event);
-    void OnMenuSettings(wxCommandEvent& event); // Event handler for settings
-    void OnToggleShowNeighborCount(wxCommandEvent& event); // Event handler for showing neighbor count
+    void OnMenuSettings(wxCommandEvent& event);
+    void OnToggleShowNeighborCount(wxCommandEvent& event);
+    void OnRandomize(wxCommandEvent& event);            // Event handler for randomize
+    void OnRandomizeWithSeed(wxCommandEvent& event);    // Event handler for randomize with seed
+    void RandomizeGrid(int seed);                       // Method to randomize the grid
+
     int GetLivingNeighbors(int row, int col);
     void NextGeneration();
     void OnTimer(wxTimerEvent& event);
@@ -29,18 +33,18 @@ private:
     DrawingPanel* drawingPanel;
     wxBoxSizer* sizer;
     wxToolBar* toolBar;
-    wxMenuBar* menuBar; // Menu bar
-    wxMenu* optionsMenu; // Options menu
-    wxMenu* viewMenu; // View menu
+    wxMenuBar* menuBar;
+    wxMenu* optionsMenu;
+    wxMenu* viewMenu;
     std::vector<std::vector<bool>> gameBoard;
-    std::vector<std::vector<int>> neighborCounts; // Neighbor counts
+    std::vector<std::vector<int>> neighborCounts;
 
     wxStatusBar* statusBar;
     int generationCount = 0;
     int livingCellsCount = 0;
 
     wxTimer* timer;
-    Settings settings;  // Settings object
+    Settings settings;
 
     wxDECLARE_EVENT_TABLE();
 };

@@ -3,7 +3,10 @@
 #include "play.xpm"
 #include "pause.xpm"
 #include "next.xpm"
-#include "trash.xpm" // Include the trash icon
+#include "trash.xpm"
+#include <ctime>
+#include <cstdlib>
+#include <wx/numdlg.h> // Include for number dialog
 
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
 EVT_SIZE(MainWindow::OnSizeChange)
@@ -11,15 +14,16 @@ EVT_MENU(10001, MainWindow::OnPlay)
 EVT_MENU(10002, MainWindow::OnPause)
 EVT_MENU(10003, MainWindow::OnNext)
 EVT_MENU(10004, MainWindow::OnClear)
-EVT_MENU(10006, MainWindow::OnMenuSettings)  // Event for settings menu
-EVT_MENU(10007, MainWindow::OnToggleShowNeighborCount) // Event for toggling neighbor count
+EVT_MENU(10006, MainWindow::OnMenuSettings)
+EVT_MENU(10007, MainWindow::OnToggleShowNeighborCount)
+EVT_MENU(10008, MainWindow::OnRandomize)            // Event for randomize
+EVT_MENU(10009, MainWindow::OnRandomizeWithSeed)    // Event for randomize with seed
 EVT_TIMER(10005, MainWindow::OnTimer)
 wxEND_EVENT_TABLE()
 
 MainWindow::MainWindow()
     : wxFrame(nullptr, wxID_ANY, "Game of Life", wxPoint(0, 0), wxSize(400, 400))
 {
-    // Load settings at startup
     settings.Load();
 
     sizer = new wxBoxSizer(wxVERTICAL);
@@ -35,7 +39,7 @@ MainWindow::MainWindow()
     wxBitmap playIcon(play_xpm);
     wxBitmap pauseIcon(pause_xpm);
     wxBitmap nextIcon(next_xpm);
-    wxBitmap clearIcon(trash_xpm); // Use the trash icon
+    wxBitmap clearIcon(trash_xpm);
 
     toolBar->AddTool(10001, "Play", playIcon);
     toolBar->AddTool(10002, "Pause", pauseIcon);
@@ -50,6 +54,8 @@ MainWindow::MainWindow()
     // Create the options menu
     optionsMenu = new wxMenu();
     optionsMenu->Append(10006, "Settings");
+    optionsMenu->Append(10008, "Randomize");            // Add randomize option
+    optionsMenu->Append(10009, "Randomize with Seed");  // Add randomize with seed option
 
     // Create the view menu
     viewMenu = new wxMenu();
@@ -66,14 +72,12 @@ MainWindow::MainWindow()
     this->Layout();
 
     InitializeGrid();
-
-    // Set the initial state of the neighbor count menu item
     viewMenu->Check(10007, settings.showNeighborCount);
 
     timer = new wxTimer(this, 10005);
 }
 
-MainWindow::~MainWindow()  // Destructor definition
+MainWindow::~MainWindow()
 {
     if (timer)
     {
@@ -84,7 +88,6 @@ MainWindow::~MainWindow()  // Destructor definition
 
 void MainWindow::OnMenuSettings(wxCommandEvent& event)
 {
-    // Save current settings in case the user cancels
     Settings oldSettings = settings;
 
     SettingsDialog dlg(this, &settings);
@@ -93,12 +96,10 @@ void MainWindow::OnMenuSettings(wxCommandEvent& event)
         InitializeGrid();
         UpdateStatusBar();
         drawingPanel->Refresh();
-        // Save settings if OK was clicked
         settings.Save();
     }
     else
     {
-        // Restore old settings if cancel was clicked
         settings = oldSettings;
     }
 }
@@ -107,6 +108,37 @@ void MainWindow::OnToggleShowNeighborCount(wxCommandEvent& event)
 {
     settings.showNeighborCount = !settings.showNeighborCount;
     settings.Save();
+    drawingPanel->Refresh();
+}
+
+void MainWindow::OnRandomize(wxCommandEvent& event)
+{
+    RandomizeGrid(static_cast<int>(time(nullptr)));
+}
+
+void MainWindow::OnRandomizeWithSeed(wxCommandEvent& event)
+{
+    long seed = wxGetNumberFromUser("Enter a seed value:", "Seed:", "Randomize with Seed", 0, 0, LONG_MAX, this);
+    if (seed != -1) // If user did not cancel
+    {
+        RandomizeGrid(static_cast<int>(seed));
+    }
+}
+
+void MainWindow::RandomizeGrid(int seed)
+{
+    srand(seed);
+
+    for (int row = 0; row < settings.gridSize; ++row)
+    {
+        for (int col = 0; col < settings.gridSize; ++col)
+        {
+            gameBoard[row][col] = (rand() % 100 < 50); // 50% chance of being alive
+        }
+    }
+
+    generationCount = 0;
+    UpdateStatusBar();
     drawingPanel->Refresh();
 }
 
@@ -122,7 +154,7 @@ void MainWindow::OnSizeChange(wxSizeEvent& event)
 
 void MainWindow::InitializeGrid()
 {
-    gameBoard.resize(settings.gridSize);  // Use settings for grid size
+    gameBoard.resize(settings.gridSize);
     neighborCounts.resize(settings.gridSize);
     for (auto& row : gameBoard)
     {
@@ -183,11 +215,11 @@ void MainWindow::NextGeneration()
 
             if (gameBoard[row][col])
             {
-                if (livingNeighbors < 2 || livingNeighbors > 3) // Rule 1 and 3
+                if (livingNeighbors < 2 || livingNeighbors > 3)
                 {
                     sandbox[row][col] = false;
                 }
-                else // Rule 2
+                else
                 {
                     sandbox[row][col] = true;
                     ++newLivingCellsCount;
@@ -195,7 +227,7 @@ void MainWindow::NextGeneration()
             }
             else
             {
-                if (livingNeighbors == 3) // Rule 4
+                if (livingNeighbors == 3)
                 {
                     sandbox[row][col] = true;
                     ++newLivingCellsCount;
@@ -215,7 +247,7 @@ void MainWindow::NextGeneration()
 
 void MainWindow::OnPlay(wxCommandEvent& event)
 {
-    timer->Start(settings.interval);  // Use settings for interval
+    timer->Start(settings.interval);
 }
 
 void MainWindow::OnPause(wxCommandEvent& event)
