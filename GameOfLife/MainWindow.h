@@ -1,9 +1,9 @@
-// MainWindow.h
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include "wx/wx.h"
 #include "DrawingPanel.h"
+#include "GameSettings.h"
 #include <vector>
 
 class MainWindow : public wxFrame
@@ -21,21 +21,20 @@ public:
     void OnClear(wxCommandEvent& event);
     int GetLivingNeighbors(int row, int col);
     void NextGeneration();
-    void OnTimer(wxTimerEvent& event);  // New timer event handler
+    void OnTimer(wxTimerEvent& event);
 
 private:
     DrawingPanel* drawingPanel;
     wxBoxSizer* sizer;
     wxToolBar* toolBar;
     std::vector<std::vector<bool>> gameBoard;
-    int gridSize = 15;
 
     wxStatusBar* statusBar;
     int generationCount = 0;
     int livingCellsCount = 0;
 
-    wxTimer* timer;  // Timer variable
-    int timerInterval = 50;  // Timer interval in milliseconds
+    wxTimer* timer;
+    Settings settings;  // Settings object
 
     wxDECLARE_EVENT_TABLE();
 };

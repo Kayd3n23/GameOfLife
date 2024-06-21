@@ -1,4 +1,3 @@
-// MainWindow.cpp
 #include "MainWindow.h"
 #include "play.xpm"
 #include "pause.xpm"
@@ -11,7 +10,7 @@ EVT_MENU(10001, MainWindow::OnPlay)
 EVT_MENU(10002, MainWindow::OnPause)
 EVT_MENU(10003, MainWindow::OnNext)
 EVT_MENU(10004, MainWindow::OnClear)
-EVT_TIMER(10005, MainWindow::OnTimer)  // Add event for timer
+EVT_TIMER(10005, MainWindow::OnTimer)
 wxEND_EVENT_TABLE()
 
 MainWindow::MainWindow()
@@ -19,6 +18,7 @@ MainWindow::MainWindow()
 {
     sizer = new wxBoxSizer(wxVERTICAL);
     drawingPanel = new DrawingPanel(this, gameBoard);
+    drawingPanel->SetSettings(&settings);  // Pass settings to DrawingPanel
     sizer->Add(drawingPanel, 1, wxEXPAND | wxALL);
 
     statusBar = CreateStatusBar();
@@ -69,13 +69,13 @@ void MainWindow::OnSizeChange(wxSizeEvent& event)
 
 void MainWindow::InitializeGrid()
 {
-    gameBoard.resize(gridSize);
+    gameBoard.resize(settings.gridSize);  // Use settings for grid size
     for (auto& row : gameBoard)
     {
-        row.resize(gridSize, false);
+        row.resize(settings.gridSize, false);
     }
 
-    drawingPanel->SetGridSize(gridSize);
+    drawingPanel->SetGridSize(settings.gridSize);
 }
 
 void MainWindow::UpdateStatusBar()
@@ -89,19 +89,17 @@ int MainWindow::GetLivingNeighbors(int row, int col)
 {
     int livingNeighbors = 0;
 
-    // Iterate over the 3x3 grid centered on (row, col)
     for (int i = -1; i <= 1; ++i)
     {
-        for (int j = -1; j <= 1; ++j)
+        for (int j = -1; i <= 1; ++j)
         {
             if (i == 0 && j == 0)
-                continue; // Skip the cell itself
+                continue;
 
             int newRow = row + i;
             int newCol = col + j;
 
-            // Ensure indices are within bounds
-            if (newRow >= 0 && newRow < gridSize && newCol >= 0 && newCol < gridSize)
+            if (newRow >= 0 && newRow < settings.gridSize && newCol >= 0 && newCol < settings.gridSize)
             {
                 if (gameBoard[newRow][newCol])
                     ++livingNeighbors;
@@ -114,63 +112,56 @@ int MainWindow::GetLivingNeighbors(int row, int col)
 
 void MainWindow::NextGeneration()
 {
-    // Create a sandbox for the next generation
-    std::vector<std::vector<bool>> sandbox(gridSize, std::vector<bool>(gridSize, false));
+    std::vector<std::vector<bool>> sandbox(settings.gridSize, std::vector<bool>(settings.gridSize, false));
 
-    // Count the number of living cells
     int newLivingCellsCount = 0;
 
-    // Iterate over the game board
-    for (int row = 0; row < gridSize; ++row)
+    for (int row = 0; row < settings.gridSize; ++row)
     {
-        for (int col = 0; col < gridSize; ++col)
+        for (int col = 0; col < settings.gridSize; ++col)
         {
             int livingNeighbors = GetLivingNeighbors(row, col);
 
-            // Apply the rules of the Game of Life
             if (gameBoard[row][col])
             {
                 if (livingNeighbors == 2 || livingNeighbors == 3)
                 {
-                    sandbox[row][col] = true; // Cell survives
+                    sandbox[row][col] = true;
                     ++newLivingCellsCount;
                 }
                 else
                 {
-                    sandbox[row][col] = false; // Cell dies
+                    sandbox[row][col] = false;
                 }
             }
             else
             {
                 if (livingNeighbors == 3)
                 {
-                    sandbox[row][col] = true; // Cell becomes alive
+                    sandbox[row][col] = true;
                     ++newLivingCellsCount;
                 }
             }
         }
     }
 
-    // Swap the sandbox with the game board
     std::swap(gameBoard, sandbox);
 
-    // Update generation count and living cells count
     ++generationCount;
     livingCellsCount = newLivingCellsCount;
 
-    // Update the status bar and refresh the panel
     UpdateStatusBar();
     drawingPanel->Refresh();
 }
 
 void MainWindow::OnPlay(wxCommandEvent& event)
 {
-    timer->Start(timerInterval);  // Start the timer with the interval
+    timer->Start(settings.interval);  // Use settings for interval
 }
 
 void MainWindow::OnPause(wxCommandEvent& event)
 {
-    timer->Stop();  // Stop the timer
+    timer->Stop();
 }
 
 void MainWindow::OnNext(wxCommandEvent& event)
@@ -180,22 +171,19 @@ void MainWindow::OnNext(wxCommandEvent& event)
 
 void MainWindow::OnClear(wxCommandEvent& event)
 {
-    // Reset the game board
-    for (auto& row : gameBoard) 
+    for (auto& row : gameBoard)
     {
         std::fill(row.begin(), row.end(), false);
     }
 
-    // Reset generation and living cells count
     generationCount = 0;
     livingCellsCount = 0;
 
-    // Update the status bar and refresh the panel
     UpdateStatusBar();
     drawingPanel->Refresh();
 }
- 
+
 void MainWindow::OnTimer(wxTimerEvent& event)
 {
-    NextGeneration();  // Call NextGeneration on each timer event
-} 
+    NextGeneration();
+}

@@ -1,8 +1,8 @@
-// DrawingPanel.h
 #ifndef DRAWINGPANEL_H
 #define DRAWINGPANEL_H
 
 #include "wx/wx.h"
+#include "GameSettings.h"
 #include <vector>
 
 class DrawingPanel : public wxPanel
@@ -15,10 +15,11 @@ public:
     void SetSize(const wxSize& size);
     void SetGridSize(int size);
     void OnMouseUp(wxMouseEvent& event);
+    void SetSettings(Settings* settings);  // Setter for settings pointer
 
 private:
-    int gridSize = 15;
     std::vector<std::vector<bool>>& gameBoardRef;
+    Settings* settings;  // Settings pointer
 
     wxDECLARE_EVENT_TABLE();
 };

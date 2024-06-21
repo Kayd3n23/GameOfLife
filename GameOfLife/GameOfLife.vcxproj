@@ -133,11 +133,13 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="DrawingPanel.cpp" />
+    <ClCompile Include="GameSettings.cpp" />
     <ClCompile Include="MainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="DrawingPanel.h" />
+    <ClInclude Include="GameSettings.h" />
     <ClInclude Include="MainWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
