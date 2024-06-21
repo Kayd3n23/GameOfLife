@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "SettingsDialog.h"
 #include "play.xpm"
 #include "pause.xpm"
 #include "next.xpm"
@@ -10,6 +11,7 @@ EVT_MENU(10001, MainWindow::OnPlay)
 EVT_MENU(10002, MainWindow::OnPause)
 EVT_MENU(10003, MainWindow::OnNext)
 EVT_MENU(10004, MainWindow::OnClear)
+EVT_BUTTON(10006, MainWindow::OnSettings)  // Add event for settings button
 EVT_TIMER(10005, MainWindow::OnTimer)
 wxEND_EVENT_TABLE()
 
@@ -18,7 +20,7 @@ MainWindow::MainWindow()
 {
     sizer = new wxBoxSizer(wxVERTICAL);
     drawingPanel = new DrawingPanel(this, gameBoard);
-    drawingPanel->SetSettings(&settings);  // Pass settings to DrawingPanel
+    drawingPanel->SetSettings(&settings);
     sizer->Add(drawingPanel, 1, wxEXPAND | wxALL);
 
     statusBar = CreateStatusBar();
@@ -36,6 +38,9 @@ MainWindow::MainWindow()
     toolBar->AddTool(10003, "Next", nextIcon);
     toolBar->AddTool(10004, "Clear", trashIcon);
 
+    wxButton* settingsButton = new wxButton(toolBar, 10006, "Settings", wxDefaultPosition, wxDefaultSize, 0);
+    toolBar->AddControl(settingsButton);
+
     toolBar->Realize();
 
     this->SetSizer(sizer);
@@ -43,17 +48,26 @@ MainWindow::MainWindow()
 
     InitializeGrid();
 
-    // Initialize the timer
     timer = new wxTimer(this, 10005);
 }
 
-MainWindow::~MainWindow()
+MainWindow::~MainWindow()  // Destructor definition
 {
-    // Destructor
     if (timer)
     {
         timer->Stop();
         delete timer;
+    }
+}
+
+void MainWindow::OnSettings(wxCommandEvent& event)
+{
+    SettingsDialog dlg(this, &settings);
+    if (dlg.ShowModal() == wxID_OK)
+    {
+        InitializeGrid();
+        UpdateStatusBar();
+        drawingPanel->Refresh();
     }
 }
 
@@ -91,7 +105,7 @@ int MainWindow::GetLivingNeighbors(int row, int col)
 
     for (int i = -1; i <= 1; ++i)
     {
-        for (int j = -1; i <= 1; ++j)
+        for (int j = -1; j <= 1; ++j)
         {
             if (i == 0 && j == 0)
                 continue;

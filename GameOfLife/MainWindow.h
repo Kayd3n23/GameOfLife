@@ -10,7 +10,7 @@ class MainWindow : public wxFrame
 {
 public:
     MainWindow();
-    ~MainWindow();
+    ~MainWindow();  // Destructor declaration
 
     void OnSizeChange(wxSizeEvent& event);
     void InitializeGrid();
@@ -19,6 +19,7 @@ public:
     void OnPause(wxCommandEvent& event);
     void OnNext(wxCommandEvent& event);
     void OnClear(wxCommandEvent& event);
+    void OnSettings(wxCommandEvent& event); // New method for settings dialog
     int GetLivingNeighbors(int row, int col);
     void NextGeneration();
     void OnTimer(wxTimerEvent& event);
