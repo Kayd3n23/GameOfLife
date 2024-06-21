@@ -19,7 +19,8 @@ public:
     void OnPause(wxCommandEvent& event);
     void OnNext(wxCommandEvent& event);
     void OnClear(wxCommandEvent& event);
-    void OnMenuSettings(wxCommandEvent& event); // Event handler for menu settings
+    void OnMenuSettings(wxCommandEvent& event); // Event handler for settings
+    void OnToggleShowNeighborCount(wxCommandEvent& event); // Event handler for showing neighbor count
     int GetLivingNeighbors(int row, int col);
     void NextGeneration();
     void OnTimer(wxTimerEvent& event);
@@ -30,7 +31,9 @@ private:
     wxToolBar* toolBar;
     wxMenuBar* menuBar; // Menu bar
     wxMenu* optionsMenu; // Options menu
+    wxMenu* viewMenu; // View menu
     std::vector<std::vector<bool>> gameBoard;
+    std::vector<std::vector<int>> neighborCounts; // Neighbor counts
 
     wxStatusBar* statusBar;
     int generationCount = 0;

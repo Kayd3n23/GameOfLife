@@ -8,18 +8,18 @@
 class DrawingPanel : public wxPanel
 {
 public:
-    DrawingPanel(wxWindow* parent, std::vector<std::vector<bool>>& gameBoard);
-    ~DrawingPanel();
-
-    void OnPaint(wxPaintEvent& event);
-    void SetSize(const wxSize& size);
-    void SetGridSize(int size);
-    void OnMouseUp(wxMouseEvent& event);
-    void SetSettings(Settings* settings);  // Setter for settings pointer
+    DrawingPanel(wxWindow* parent, std::vector<std::vector<bool>>& gameBoard, const std::vector<std::vector<int>>& neighborCounts);
+    void SetSettings(Settings* settings);
+    void SetGridSize(int gridSize);
 
 private:
-    std::vector<std::vector<bool>>& gameBoardRef;
-    Settings* settings;  // Settings pointer
+    void OnPaint(wxPaintEvent& event);
+    void OnMouseUp(wxMouseEvent& event); // Mouse event handler
+    std::vector<std::vector<bool>>& gameBoard; // Make gameBoard modifiable
+    const std::vector<std::vector<int>>& neighborCounts;
+    Settings* settings;
+
+    int gridSize;
 
     wxDECLARE_EVENT_TABLE();
 };

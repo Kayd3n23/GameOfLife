@@ -1,5 +1,9 @@
 #include "MainWindow.h"
 #include "SettingsDialog.h"
+#include "play.xpm"
+#include "pause.xpm"
+#include "next.xpm"
+#include "trash.xpm" // Include the trash icon
 
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
 EVT_SIZE(MainWindow::OnSizeChange)
@@ -8,6 +12,7 @@ EVT_MENU(10002, MainWindow::OnPause)
 EVT_MENU(10003, MainWindow::OnNext)
 EVT_MENU(10004, MainWindow::OnClear)
 EVT_MENU(10006, MainWindow::OnMenuSettings)  // Event for settings menu
+EVT_MENU(10007, MainWindow::OnToggleShowNeighborCount) // Event for toggling neighbor count
 EVT_TIMER(10005, MainWindow::OnTimer)
 wxEND_EVENT_TABLE()
 
@@ -18,7 +23,7 @@ MainWindow::MainWindow()
     settings.Load();
 
     sizer = new wxBoxSizer(wxVERTICAL);
-    drawingPanel = new DrawingPanel(this, gameBoard);
+    drawingPanel = new DrawingPanel(this, gameBoard, neighborCounts);
     drawingPanel->SetSettings(&settings);
     sizer->Add(drawingPanel, 1, wxEXPAND | wxALL);
 
@@ -27,15 +32,15 @@ MainWindow::MainWindow()
 
     toolBar = CreateToolBar();
 
-    wxButton* playButton = new wxButton(toolBar, 10001, "Play");
-    wxButton* pauseButton = new wxButton(toolBar, 10002, "Pause");
-    wxButton* nextButton = new wxButton(toolBar, 10003, "Next");
-    wxButton* clearButton = new wxButton(toolBar, 10004, "Clear");
+    wxBitmap playIcon(play_xpm);
+    wxBitmap pauseIcon(pause_xpm);
+    wxBitmap nextIcon(next_xpm);
+    wxBitmap clearIcon(trash_xpm); // Use the trash icon
 
-    toolBar->AddControl(playButton);
-    toolBar->AddControl(pauseButton);
-    toolBar->AddControl(nextButton);
-    toolBar->AddControl(clearButton);
+    toolBar->AddTool(10001, "Play", playIcon);
+    toolBar->AddTool(10002, "Pause", pauseIcon);
+    toolBar->AddTool(10003, "Next", nextIcon);
+    toolBar->AddTool(10004, "Clear", clearIcon);
 
     toolBar->Realize();
 
@@ -46,8 +51,13 @@ MainWindow::MainWindow()
     optionsMenu = new wxMenu();
     optionsMenu->Append(10006, "Settings");
 
-    // Add the options menu to the menu bar
+    // Create the view menu
+    viewMenu = new wxMenu();
+    viewMenu->AppendCheckItem(10007, "Show Neighbor Count");
+
+    // Add the options and view menus to the menu bar
     menuBar->Append(optionsMenu, "Options");
+    menuBar->Append(viewMenu, "View");
 
     // Set the menu bar
     SetMenuBar(menuBar);
@@ -56,6 +66,9 @@ MainWindow::MainWindow()
     this->Layout();
 
     InitializeGrid();
+
+    // Set the initial state of the neighbor count menu item
+    viewMenu->Check(10007, settings.showNeighborCount);
 
     timer = new wxTimer(this, 10005);
 }
@@ -90,6 +103,13 @@ void MainWindow::OnMenuSettings(wxCommandEvent& event)
     }
 }
 
+void MainWindow::OnToggleShowNeighborCount(wxCommandEvent& event)
+{
+    settings.showNeighborCount = !settings.showNeighborCount;
+    settings.Save();
+    drawingPanel->Refresh();
+}
+
 void MainWindow::OnSizeChange(wxSizeEvent& event)
 {
     if (drawingPanel)
@@ -103,9 +123,14 @@ void MainWindow::OnSizeChange(wxSizeEvent& event)
 void MainWindow::InitializeGrid()
 {
     gameBoard.resize(settings.gridSize);  // Use settings for grid size
+    neighborCounts.resize(settings.gridSize);
     for (auto& row : gameBoard)
     {
         row.resize(settings.gridSize, false);
+    }
+    for (auto& row : neighborCounts)
+    {
+        row.resize(settings.gridSize, 0);
     }
 
     drawingPanel->SetGridSize(settings.gridSize);
@@ -154,22 +179,23 @@ void MainWindow::NextGeneration()
         for (int col = 0; col < settings.gridSize; ++col)
         {
             int livingNeighbors = GetLivingNeighbors(row, col);
+            neighborCounts[row][col] = livingNeighbors;
 
             if (gameBoard[row][col])
             {
-                if (livingNeighbors == 2 || livingNeighbors == 3)
+                if (livingNeighbors < 2 || livingNeighbors > 3) // Rule 1 and 3
+                {
+                    sandbox[row][col] = false;
+                }
+                else // Rule 2
                 {
                     sandbox[row][col] = true;
                     ++newLivingCellsCount;
                 }
-                else
-                {
-                    sandbox[row][col] = false;
-                }
             }
             else
             {
-                if (livingNeighbors == 3)
+                if (livingNeighbors == 3) // Rule 4
                 {
                     sandbox[row][col] = true;
                     ++newLivingCellsCount;
@@ -207,6 +233,11 @@ void MainWindow::OnClear(wxCommandEvent& event)
     for (auto& row : gameBoard)
     {
         std::fill(row.begin(), row.end(), false);
+    }
+
+    for (auto& row : neighborCounts)
+    {
+        std::fill(row.begin(), row.end(), 0);
     }
 
     generationCount = 0;

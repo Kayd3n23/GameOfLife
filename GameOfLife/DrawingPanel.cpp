@@ -1,27 +1,26 @@
 #include "DrawingPanel.h"
 #include "wx/graphics.h"
 #include "wx/dcbuffer.h"
-#include "MainWindow.h"
 
 wxBEGIN_EVENT_TABLE(DrawingPanel, wxPanel)
 EVT_PAINT(DrawingPanel::OnPaint)
-EVT_LEFT_UP(DrawingPanel::OnMouseUp)
+EVT_LEFT_UP(DrawingPanel::OnMouseUp) // Bind mouse up event
 wxEND_EVENT_TABLE()
 
-DrawingPanel::DrawingPanel(wxWindow* parent, std::vector<std::vector<bool>>& gameBoard)
-    : wxPanel(parent, wxID_ANY), gameBoardRef(gameBoard), settings(nullptr)
+DrawingPanel::DrawingPanel(wxWindow* parent, std::vector<std::vector<bool>>& gameBoard, const std::vector<std::vector<int>>& neighborCounts)
+    : wxPanel(parent), gameBoard(gameBoard), neighborCounts(neighborCounts), settings(nullptr), gridSize(15)
 {
     this->SetBackgroundStyle(wxBG_STYLE_PAINT);
-}
-
-DrawingPanel::~DrawingPanel()
-{
-    // Empty destructor for now
 }
 
 void DrawingPanel::SetSettings(Settings* settings)
 {
     this->settings = settings;
+}
+
+void DrawingPanel::SetGridSize(int gridSize)
+{
+    this->gridSize = gridSize;
 }
 
 void DrawingPanel::OnPaint(wxPaintEvent& event)
@@ -37,73 +36,56 @@ void DrawingPanel::OnPaint(wxPaintEvent& event)
 
     context->SetPen(*wxBLACK);
 
-    wxSize panelSize = GetClientSize();
-    int panelWidth = panelSize.GetWidth();
-    int panelHeight = panelSize.GetHeight();
+    wxSize size = GetClientSize();
+    int cellWidth = size.GetWidth() / gridSize;
+    int cellHeight = size.GetHeight() / gridSize;
 
-    int cellWidth = panelWidth / settings->gridSize;
-    int cellHeight = panelHeight / settings->gridSize;
-
-    for (int row = 0; row < settings->gridSize; ++row)
+    for (int row = 0; row < gridSize; ++row)
     {
-        for (int col = 0; col < settings->gridSize; ++col)
+        for (int col = 0; col < gridSize; ++col)
         {
-            int x = col * cellWidth;
-            int y = row * cellHeight;
-
-            if (gameBoardRef[row][col])
+            if (gameBoard[row][col])
             {
-                context->SetBrush(wxBrush(settings->GetLivingCellColor()));
+                context->SetBrush(settings->GetLivingCellColor());
             }
             else
             {
-                context->SetBrush(wxBrush(settings->GetDeadCellColor()));
+                context->SetBrush(settings->GetDeadCellColor());
             }
 
+            int x = col * cellWidth;
+            int y = row * cellHeight;
             context->DrawRectangle(x, y, cellWidth, cellHeight);
+
+            if (settings->showNeighborCount && neighborCounts[row][col] > 0)
+            {
+                wxString text = wxString::Format("%d", neighborCounts[row][col]);
+                double textWidth, textHeight;
+                context->SetFont(wxFontInfo(16), *wxRED);
+                context->GetTextExtent(text, &textWidth, &textHeight);
+                context->DrawText(text, x + (cellWidth - textWidth) / 2, y + (cellHeight - textHeight) / 2);
+            }
         }
     }
 
     delete context;
 }
 
-void DrawingPanel::SetSize(const wxSize& size)
-{
-    wxPanel::SetSize(size);
-    Refresh();
-}
-
-void DrawingPanel::SetGridSize(int size)
-{
-    settings->gridSize = size;
-    Refresh();
-}
-
 void DrawingPanel::OnMouseUp(wxMouseEvent& event)
 {
-    int mouseX = event.GetX();
-    int mouseY = event.GetY();
+    if (!settings) return;
 
-    wxSize panelSize = GetClientSize();
-    int panelWidth = panelSize.GetWidth();
-    int panelHeight = panelSize.GetHeight();
+    wxPoint pos = event.GetPosition();
+    wxSize size = GetClientSize();
+    int cellWidth = size.GetWidth() / gridSize;
+    int cellHeight = size.GetHeight() / gridSize;
 
-    int cellWidth = panelWidth / settings->gridSize;
-    int cellHeight = panelHeight / settings->gridSize;
+    int col = pos.x / cellWidth;
+    int row = pos.y / cellHeight;
 
-    int col = mouseX / cellWidth;
-    int row = mouseY / cellHeight;
-
-    if (col >= 0 && col < settings->gridSize && row >= 0 && row < settings->gridSize)
+    if (col >= 0 && col < gridSize && row >= 0 && row < gridSize)
     {
-        gameBoardRef[row][col] = !gameBoardRef[row][col];
-
-        MainWindow* parentWindow = dynamic_cast<MainWindow*>(GetParent());
-        if (parentWindow)
-        {
-            parentWindow->UpdateStatusBar();
-        }
-
+        gameBoard[row][col] = !gameBoard[row][col]; // Toggle cell state
         Refresh();
     }
 }

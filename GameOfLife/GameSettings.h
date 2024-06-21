@@ -18,6 +18,7 @@ struct Settings
 
     int gridSize = 15;
     int interval = 50;
+    bool showNeighborCount = false; // New option for showing neighbor count
 
     wxColor GetLivingCellColor() const
     {
