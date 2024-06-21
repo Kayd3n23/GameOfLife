@@ -14,6 +14,9 @@ wxEND_EVENT_TABLE()
 MainWindow::MainWindow()
     : wxFrame(nullptr, wxID_ANY, "Game of Life", wxPoint(0, 0), wxSize(400, 400))
 {
+    // Load settings at startup
+    settings.Load();
+
     sizer = new wxBoxSizer(wxVERTICAL);
     drawingPanel = new DrawingPanel(this, gameBoard);
     drawingPanel->SetSettings(&settings);
@@ -68,12 +71,22 @@ MainWindow::~MainWindow()  // Destructor definition
 
 void MainWindow::OnMenuSettings(wxCommandEvent& event)
 {
+    // Save current settings in case the user cancels
+    Settings oldSettings = settings;
+
     SettingsDialog dlg(this, &settings);
     if (dlg.ShowModal() == wxID_OK)
     {
         InitializeGrid();
         UpdateStatusBar();
         drawingPanel->Refresh();
+        // Save settings if OK was clicked
+        settings.Save();
+    }
+    else
+    {
+        // Restore old settings if cancel was clicked
+        settings = oldSettings;
     }
 }
 
