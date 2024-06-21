@@ -1,9 +1,5 @@
 #include "MainWindow.h"
 #include "SettingsDialog.h"
-#include "play.xpm"
-#include "pause.xpm"
-#include "next.xpm"
-#include "trash.xpm"
 
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
 EVT_SIZE(MainWindow::OnSizeChange)
@@ -11,7 +7,7 @@ EVT_MENU(10001, MainWindow::OnPlay)
 EVT_MENU(10002, MainWindow::OnPause)
 EVT_MENU(10003, MainWindow::OnNext)
 EVT_MENU(10004, MainWindow::OnClear)
-EVT_BUTTON(10006, MainWindow::OnSettings)  // Add event for settings button
+EVT_MENU(10006, MainWindow::OnMenuSettings)  // Event for settings menu
 EVT_TIMER(10005, MainWindow::OnTimer)
 wxEND_EVENT_TABLE()
 
@@ -28,20 +24,30 @@ MainWindow::MainWindow()
 
     toolBar = CreateToolBar();
 
-    wxBitmap playIcon(play_xpm);
-    wxBitmap pauseIcon(pause_xpm);
-    wxBitmap nextIcon(next_xpm);
-    wxBitmap trashIcon(trash_xpm);
+    wxButton* playButton = new wxButton(toolBar, 10001, "Play");
+    wxButton* pauseButton = new wxButton(toolBar, 10002, "Pause");
+    wxButton* nextButton = new wxButton(toolBar, 10003, "Next");
+    wxButton* clearButton = new wxButton(toolBar, 10004, "Clear");
 
-    toolBar->AddTool(10001, "Play", playIcon);
-    toolBar->AddTool(10002, "Pause", pauseIcon);
-    toolBar->AddTool(10003, "Next", nextIcon);
-    toolBar->AddTool(10004, "Clear", trashIcon);
-
-    wxButton* settingsButton = new wxButton(toolBar, 10006, "Settings", wxDefaultPosition, wxDefaultSize, 0);
-    toolBar->AddControl(settingsButton);
+    toolBar->AddControl(playButton);
+    toolBar->AddControl(pauseButton);
+    toolBar->AddControl(nextButton);
+    toolBar->AddControl(clearButton);
 
     toolBar->Realize();
+
+    // Create the menu bar
+    menuBar = new wxMenuBar();
+
+    // Create the options menu
+    optionsMenu = new wxMenu();
+    optionsMenu->Append(10006, "Settings");
+
+    // Add the options menu to the menu bar
+    menuBar->Append(optionsMenu, "Options");
+
+    // Set the menu bar
+    SetMenuBar(menuBar);
 
     this->SetSizer(sizer);
     this->Layout();
@@ -60,7 +66,7 @@ MainWindow::~MainWindow()  // Destructor definition
     }
 }
 
-void MainWindow::OnSettings(wxCommandEvent& event)
+void MainWindow::OnMenuSettings(wxCommandEvent& event)
 {
     SettingsDialog dlg(this, &settings);
     if (dlg.ShowModal() == wxID_OK)
