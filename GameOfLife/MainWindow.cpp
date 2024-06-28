@@ -29,6 +29,7 @@ EVT_MENU(10015, MainWindow::OnSaveAs)
 EVT_MENU(10016, MainWindow::OnExit)
 EVT_MENU(10017, MainWindow::OnFinite)
 EVT_MENU(10018, MainWindow::OnToroidal)
+EVT_MENU(10019, MainWindow::OnResetSettings) // New event for resetting settings
 EVT_TIMER(10005, MainWindow::OnTimer)
 wxEND_EVENT_TABLE()
 
@@ -75,6 +76,7 @@ MainWindow::MainWindow()
     optionsMenu->Append(10006, "Settings");
     optionsMenu->Append(10008, "Randomize");
     optionsMenu->Append(10009, "Randomize with Seed");
+    optionsMenu->Append(10019, "Reset Settings"); // Add Reset Settings option
 
     // Create the view menu
     viewMenu = new wxMenu();
@@ -231,6 +233,17 @@ void MainWindow::OnToroidal(wxCommandEvent& event)
     toroidalMenuItem->Check(true);
     settings.universeType = UniverseType::Toroidal;
     settings.Save();
+}
+
+void MainWindow::OnResetSettings(wxCommandEvent& event)
+{
+    settings.ResetToDefaults();
+    InitializeGrid();
+    UpdateStatusBar();
+    drawingPanel->Refresh();
+    finiteMenuItem->Check(settings.universeType == UniverseType::Finite);
+    toroidalMenuItem->Check(settings.universeType == UniverseType::Toroidal);
+    viewMenu->Check(10007, settings.showNeighborCount);
 }
 
 void MainWindow::SaveToFile(const wxString& filename)

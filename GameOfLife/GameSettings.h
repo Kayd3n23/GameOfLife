@@ -23,7 +23,7 @@ struct Settings
     int gridSize = 15;
     int interval = 50;
     bool showNeighborCount = false;
-    UniverseType universeType = UniverseType::Finite; // Add universeType member
+    UniverseType universeType = UniverseType::Finite;
 
     wxColor GetLivingCellColor() const
     {
@@ -69,6 +69,23 @@ struct Settings
             file.read((char*)this, sizeof(Settings));
             file.close();
         }
+    }
+
+    void ResetToDefaults()
+    {
+        livingCellRed = 128;
+        livingCellGreen = 128;
+        livingCellBlue = 128;
+        livingCellAlpha = 255;
+        deadCellRed = 255;
+        deadCellGreen = 255;
+        deadCellBlue = 255;
+        deadCellAlpha = 255;
+        gridSize = 15;
+        interval = 50;
+        showNeighborCount = false;
+        universeType = UniverseType::Finite;
+        Save();
     }
 };
 

@@ -30,6 +30,7 @@ public:
     void OnExit(wxCommandEvent& event);
     void OnFinite(wxCommandEvent& event);
     void OnToroidal(wxCommandEvent& event);
+    void OnResetSettings(wxCommandEvent& event);  // New event handler for resetting settings
     void RandomizeGrid(int seed);
     void SaveToFile(const wxString& filename);
     void LoadFromFile(const wxString& filename);
