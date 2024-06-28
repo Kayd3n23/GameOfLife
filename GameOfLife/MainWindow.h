@@ -23,11 +23,13 @@ public:
     void OnToggleShowNeighborCount(wxCommandEvent& event);
     void OnRandomize(wxCommandEvent& event);
     void OnRandomizeWithSeed(wxCommandEvent& event);
-    void OnNew(wxCommandEvent& event);       // Event handler for New
-    void OnOpen(wxCommandEvent& event);      // Event handler for Open
-    void OnSave(wxCommandEvent& event);      // Event handler for Save
-    void OnSaveAs(wxCommandEvent& event);    // Event handler for Save As
-    void OnExit(wxCommandEvent& event);      // Event handler for Exit
+    void OnNew(wxCommandEvent& event);
+    void OnOpen(wxCommandEvent& event);
+    void OnSave(wxCommandEvent& event);
+    void OnSaveAs(wxCommandEvent& event);
+    void OnExit(wxCommandEvent& event);
+    void OnFinite(wxCommandEvent& event);
+    void OnToroidal(wxCommandEvent& event);
     void RandomizeGrid(int seed);
     void SaveToFile(const wxString& filename);
     void LoadFromFile(const wxString& filename);
@@ -44,6 +46,8 @@ private:
     wxMenu* fileMenu;
     wxMenu* optionsMenu;
     wxMenu* viewMenu;
+    wxMenuItem* finiteMenuItem;
+    wxMenuItem* toroidalMenuItem;
     std::vector<std::vector<bool>> gameBoard;
     std::vector<std::vector<int>> neighborCounts;
 
@@ -53,7 +57,7 @@ private:
 
     wxTimer* timer;
     Settings settings;
-    wxString currentFileName;  // Current file name for Save and Save As
+    wxString currentFileName;
 
     wxDECLARE_EVENT_TABLE();
 };

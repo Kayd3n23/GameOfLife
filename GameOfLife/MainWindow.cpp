@@ -21,12 +21,14 @@ EVT_MENU(10007, MainWindow::OnToggleShowNeighborCount)
 EVT_MENU(10008, MainWindow::OnRandomize)
 EVT_MENU(10009, MainWindow::OnRandomizeWithSeed)
 EVT_MENU(10010, MainWindow::OnSave)
-EVT_MENU(10011, MainWindow::OnOpen) // Corrected to OnOpen
+EVT_MENU(10011, MainWindow::OnOpen)
 EVT_MENU(10012, MainWindow::OnNew)
 EVT_MENU(10013, MainWindow::OnOpen)
 EVT_MENU(10014, MainWindow::OnSave)
 EVT_MENU(10015, MainWindow::OnSaveAs)
 EVT_MENU(10016, MainWindow::OnExit)
+EVT_MENU(10017, MainWindow::OnFinite)
+EVT_MENU(10018, MainWindow::OnToroidal)
 EVT_TIMER(10005, MainWindow::OnTimer)
 wxEND_EVENT_TABLE()
 
@@ -73,11 +75,18 @@ MainWindow::MainWindow()
     optionsMenu->Append(10006, "Settings");
     optionsMenu->Append(10008, "Randomize");
     optionsMenu->Append(10009, "Randomize with Seed");
-    optionsMenu->Append(10010, "Save");
-    optionsMenu->Append(10011, "Load");
 
     // Create the view menu
     viewMenu = new wxMenu();
+    finiteMenuItem = new wxMenuItem(viewMenu, 10017, "Finite", "", wxITEM_CHECK);
+    toroidalMenuItem = new wxMenuItem(viewMenu, 10018, "Toroidal", "", wxITEM_CHECK);
+    finiteMenuItem->SetCheckable(true);
+    toroidalMenuItem->SetCheckable(true);
+    viewMenu->Append(finiteMenuItem);
+    viewMenu->Append(toroidalMenuItem);
+    finiteMenuItem->Check(settings.universeType == UniverseType::Finite);
+    toroidalMenuItem->Check(settings.universeType == UniverseType::Toroidal);
+
     viewMenu->AppendCheckItem(10007, "Show Neighbor Count");
 
     // Add the file, options, and view menus to the menu bar
@@ -208,6 +217,22 @@ void MainWindow::OnExit(wxCommandEvent& event)
     Close(true);
 }
 
+void MainWindow::OnFinite(wxCommandEvent& event)
+{
+    finiteMenuItem->Check(true);
+    toroidalMenuItem->Check(false);
+    settings.universeType = UniverseType::Finite;
+    settings.Save();
+}
+
+void MainWindow::OnToroidal(wxCommandEvent& event)
+{
+    finiteMenuItem->Check(false);
+    toroidalMenuItem->Check(true);
+    settings.universeType = UniverseType::Toroidal;
+    settings.Save();
+}
+
 void MainWindow::SaveToFile(const wxString& filename)
 {
     wxTextFile file;
@@ -312,10 +337,33 @@ int MainWindow::GetLivingNeighbors(int row, int col)
             int newRow = row + i;
             int newCol = col + j;
 
+            if (settings.universeType == UniverseType::Toroidal) // Toroidal behavior
+            {
+                if (newRow < 0)
+                {
+                    newRow = settings.gridSize - 1;
+                }
+                else if (newRow >= settings.gridSize)
+                {
+                    newRow = 0;
+                }
+
+                if (newCol < 0)
+                {
+                    newCol = settings.gridSize - 1;
+                }
+                else if (newCol >= settings.gridSize)
+                {
+                    newCol = 0;
+                }
+            }
+
             if (newRow >= 0 && newRow < settings.gridSize && newCol >= 0 && newCol < settings.gridSize)
             {
                 if (gameBoard[newRow][newCol])
+                {
                     ++livingNeighbors;
+                }
             }
         }
     }

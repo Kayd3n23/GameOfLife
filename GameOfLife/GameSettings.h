@@ -1,56 +1,64 @@
-#ifndef GAMESETTINGS_H
-#define GAMESETTINGS_H
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
-#include "wx/wx.h"
+#include <wx/colour.h>
 #include <fstream>
+
+enum class UniverseType
+{
+    Finite,
+    Toroidal
+};
 
 struct Settings
 {
-    unsigned int livingCellColorR = 128;
-    unsigned int livingCellColorG = 128;
-    unsigned int livingCellColorB = 128;
-    unsigned int livingCellColorA = 255;
-
-    unsigned int deadCellColorR = 255;
-    unsigned int deadCellColorG = 255;
-    unsigned int deadCellColorB = 255;
-    unsigned int deadCellColorA = 255;
-
+    unsigned int livingCellRed = 128;
+    unsigned int livingCellGreen = 128;
+    unsigned int livingCellBlue = 128;
+    unsigned int livingCellAlpha = 255;
+    unsigned int deadCellRed = 255;
+    unsigned int deadCellGreen = 255;
+    unsigned int deadCellBlue = 255;
+    unsigned int deadCellAlpha = 255;
     int gridSize = 15;
     int interval = 50;
-    bool showNeighborCount = false; // New option for showing neighbor count
+    bool showNeighborCount = false;
+    UniverseType universeType = UniverseType::Finite; // Add universeType member
 
     wxColor GetLivingCellColor() const
     {
-        return wxColor(livingCellColorR, livingCellColorG, livingCellColorB, livingCellColorA);
+        return wxColor(livingCellRed, livingCellGreen, livingCellBlue, livingCellAlpha);
     }
 
     wxColor GetDeadCellColor() const
     {
-        return wxColor(deadCellColorR, deadCellColorG, deadCellColorB, deadCellColorA);
+        return wxColor(deadCellRed, deadCellGreen, deadCellBlue, deadCellAlpha);
     }
 
     void SetLivingCellColor(const wxColor& color)
     {
-        livingCellColorR = color.Red();
-        livingCellColorG = color.Green();
-        livingCellColorB = color.Blue();
-        livingCellColorA = color.Alpha();
+        livingCellRed = color.Red();
+        livingCellGreen = color.Green();
+        livingCellBlue = color.Blue();
+        livingCellAlpha = color.Alpha();
     }
 
     void SetDeadCellColor(const wxColor& color)
     {
-        deadCellColorR = color.Red();
-        deadCellColorG = color.Green();
-        deadCellColorB = color.Blue();
-        deadCellColorA = color.Alpha();
+        deadCellRed = color.Red();
+        deadCellGreen = color.Green();
+        deadCellBlue = color.Blue();
+        deadCellAlpha = color.Alpha();
     }
 
-    void Save() const
+    void Save()
     {
         std::ofstream file("settings.bin", std::ios::out | std::ios::binary);
-        file.write((char*)this, sizeof(Settings));
-        file.close();
+        if (file.is_open())
+        {
+            file.write((char*)this, sizeof(Settings));
+            file.close();
+        }
     }
 
     void Load()
@@ -64,4 +72,4 @@ struct Settings
     }
 };
 
-#endif // GAMESETTINGS_H
+#endif // SETTINGS_H
