@@ -25,15 +25,17 @@ public:
     void OnRandomizeWithSeed(wxCommandEvent& event);
     void OnNew(wxCommandEvent& event);
     void OnOpen(wxCommandEvent& event);
+    void OnImport(wxCommandEvent& event); // New event handler for importing
     void OnSave(wxCommandEvent& event);
     void OnSaveAs(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnFinite(wxCommandEvent& event);
     void OnToroidal(wxCommandEvent& event);
-    void OnResetSettings(wxCommandEvent& event);  // New event handler for resetting settings
+    void OnResetSettings(wxCommandEvent& event);
     void RandomizeGrid(int seed);
     void SaveToFile(const wxString& filename);
     void LoadFromFile(const wxString& filename);
+    void ImportFromFile(const wxString& filename); // New method for importing
 
     int GetLivingNeighbors(int row, int col);
     void NextGeneration();

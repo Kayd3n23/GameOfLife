@@ -23,13 +23,13 @@ EVT_MENU(10009, MainWindow::OnRandomizeWithSeed)
 EVT_MENU(10010, MainWindow::OnSave)
 EVT_MENU(10011, MainWindow::OnOpen)
 EVT_MENU(10012, MainWindow::OnNew)
-EVT_MENU(10013, MainWindow::OnOpen)
+EVT_MENU(10013, MainWindow::OnImport) // New event for importing
 EVT_MENU(10014, MainWindow::OnSave)
 EVT_MENU(10015, MainWindow::OnSaveAs)
 EVT_MENU(10016, MainWindow::OnExit)
 EVT_MENU(10017, MainWindow::OnFinite)
 EVT_MENU(10018, MainWindow::OnToroidal)
-EVT_MENU(10019, MainWindow::OnResetSettings) // New event for resetting settings
+EVT_MENU(10019, MainWindow::OnResetSettings)
 EVT_TIMER(10005, MainWindow::OnTimer)
 wxEND_EVENT_TABLE()
 
@@ -69,6 +69,7 @@ MainWindow::MainWindow()
     fileMenu->Append(10013, "Open");
     fileMenu->Append(10014, "Save");
     fileMenu->Append(10015, "Save As");
+    fileMenu->Append(10013, "Import"); // Add Import option
     fileMenu->Append(10016, "Exit");
 
     // Create the options menu
@@ -76,7 +77,7 @@ MainWindow::MainWindow()
     optionsMenu->Append(10006, "Settings");
     optionsMenu->Append(10008, "Randomize");
     optionsMenu->Append(10009, "Randomize with Seed");
-    optionsMenu->Append(10019, "Reset Settings"); // Add Reset Settings option
+    optionsMenu->Append(10019, "Reset Settings");
 
     // Create the view menu
     viewMenu = new wxMenu();
@@ -208,6 +209,17 @@ void MainWindow::OnOpen(wxCommandEvent& event)
     LoadFromFile(openFileDialog.GetPath());
 }
 
+void MainWindow::OnImport(wxCommandEvent& event)
+{
+    wxFileDialog importFileDialog(this, _("Import CELLS file"), "", "",
+        "CELLS files (*.cells)|*.cells", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+    if (importFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+    ImportFromFile(importFileDialog.GetPath());
+}
+
 void MainWindow::OnNew(wxCommandEvent& event)
 {
     currentFileName.Clear();
@@ -296,6 +308,35 @@ void MainWindow::LoadFromFile(const wxString& filename)
         int newGridSize = gameBoard.size() > 0 ? gameBoard[0].size() : 0;
         settings.gridSize = newGridSize;
         InitializeGrid();
+
+        generationCount = 0;
+        UpdateStatusBar();
+        drawingPanel->Refresh();
+    }
+}
+
+void MainWindow::ImportFromFile(const wxString& filename)
+{
+    wxTextFile file;
+    if (file.Open(filename))
+    {
+        for (wxString str = file.GetFirstLine(); !file.Eof(); str = file.GetNextLine())
+        {
+            if (str[0] == '!')
+                continue;
+
+            for (size_t row = 0; row < gameBoard.size() && row < file.GetLineCount(); ++row)
+            {
+                const wxString& line = file.GetLine(row);
+                for (size_t col = 0; col < gameBoard[row].size() && col < line.Length(); ++col)
+                {
+                    if (line[col] == '*')
+                        gameBoard[row][col] = true;
+                    else if (line[col] == '.')
+                        gameBoard[row][col] = false;
+                }
+            }
+        }
 
         generationCount = 0;
         UpdateStatusBar();
