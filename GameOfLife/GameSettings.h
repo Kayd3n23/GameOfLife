@@ -23,6 +23,8 @@ struct Settings
     int gridSize = 15;
     int interval = 50;
     bool showNeighborCount = false;
+    bool showGrid = true; // Add showGrid
+    bool show10x10Grid = false; // Add show10x10Grid
     UniverseType universeType = UniverseType::Finite;
 
     wxColor GetLivingCellColor() const
@@ -84,6 +86,8 @@ struct Settings
         gridSize = 15;
         interval = 50;
         showNeighborCount = false;
+        showGrid = true;
+        show10x10Grid = false;
         universeType = UniverseType::Finite;
         Save();
     }

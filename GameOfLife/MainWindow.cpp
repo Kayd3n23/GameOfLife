@@ -23,13 +23,15 @@ EVT_MENU(10009, MainWindow::OnRandomizeWithSeed)
 EVT_MENU(10010, MainWindow::OnSave)
 EVT_MENU(10011, MainWindow::OnOpen)
 EVT_MENU(10012, MainWindow::OnNew)
-EVT_MENU(10013, MainWindow::OnImport) // New event for importing
+EVT_MENU(10013, MainWindow::OnImport)
 EVT_MENU(10014, MainWindow::OnSave)
 EVT_MENU(10015, MainWindow::OnSaveAs)
 EVT_MENU(10016, MainWindow::OnExit)
 EVT_MENU(10017, MainWindow::OnFinite)
 EVT_MENU(10018, MainWindow::OnToroidal)
 EVT_MENU(10019, MainWindow::OnResetSettings)
+EVT_MENU(10020, MainWindow::OnToggleShowGrid) // New event for Show Grid
+EVT_MENU(10021, MainWindow::OnToggleShow10x10Grid) // New event for Show 10x10 Grid
 EVT_TIMER(10005, MainWindow::OnTimer)
 wxEND_EVENT_TABLE()
 
@@ -69,7 +71,7 @@ MainWindow::MainWindow()
     fileMenu->Append(10013, "Open");
     fileMenu->Append(10014, "Save");
     fileMenu->Append(10015, "Save As");
-    fileMenu->Append(10013, "Import"); // Add Import option
+    fileMenu->Append(10013, "Import");
     fileMenu->Append(10016, "Exit");
 
     // Create the options menu
@@ -91,6 +93,8 @@ MainWindow::MainWindow()
     toroidalMenuItem->Check(settings.universeType == UniverseType::Toroidal);
 
     viewMenu->AppendCheckItem(10007, "Show Neighbor Count");
+    viewMenu->AppendCheckItem(10020, "Show Grid"); // Add Show Grid option
+    viewMenu->AppendCheckItem(10021, "Show 10x10 Grid"); // Add Show 10x10 Grid option
 
     // Add the file, options, and view menus to the menu bar
     menuBar->Append(fileMenu, "File");
@@ -105,6 +109,8 @@ MainWindow::MainWindow()
 
     InitializeGrid();
     viewMenu->Check(10007, settings.showNeighborCount);
+    viewMenu->Check(10020, settings.showGrid);
+    viewMenu->Check(10021, settings.show10x10Grid);
 
     timer = new wxTimer(this, 10005);
 }
@@ -139,6 +145,20 @@ void MainWindow::OnMenuSettings(wxCommandEvent& event)
 void MainWindow::OnToggleShowNeighborCount(wxCommandEvent& event)
 {
     settings.showNeighborCount = !settings.showNeighborCount;
+    settings.Save();
+    drawingPanel->Refresh();
+}
+
+void MainWindow::OnToggleShowGrid(wxCommandEvent& event)
+{
+    settings.showGrid = !settings.showGrid;
+    settings.Save();
+    drawingPanel->Refresh();
+}
+
+void MainWindow::OnToggleShow10x10Grid(wxCommandEvent& event)
+{
+    settings.show10x10Grid = !settings.show10x10Grid;
     settings.Save();
     drawingPanel->Refresh();
 }
@@ -256,6 +276,8 @@ void MainWindow::OnResetSettings(wxCommandEvent& event)
     finiteMenuItem->Check(settings.universeType == UniverseType::Finite);
     toroidalMenuItem->Check(settings.universeType == UniverseType::Toroidal);
     viewMenu->Check(10007, settings.showNeighborCount);
+    viewMenu->Check(10020, settings.showGrid);
+    viewMenu->Check(10021, settings.show10x10Grid);
 }
 
 void MainWindow::SaveToFile(const wxString& filename)

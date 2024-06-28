@@ -21,11 +21,13 @@ public:
     void OnClear(wxCommandEvent& event);
     void OnMenuSettings(wxCommandEvent& event);
     void OnToggleShowNeighborCount(wxCommandEvent& event);
+    void OnToggleShowGrid(wxCommandEvent& event); // New event handler for Show Grid
+    void OnToggleShow10x10Grid(wxCommandEvent& event); // New event handler for Show 10x10 Grid
     void OnRandomize(wxCommandEvent& event);
     void OnRandomizeWithSeed(wxCommandEvent& event);
     void OnNew(wxCommandEvent& event);
     void OnOpen(wxCommandEvent& event);
-    void OnImport(wxCommandEvent& event); // New event handler for importing
+    void OnImport(wxCommandEvent& event);
     void OnSave(wxCommandEvent& event);
     void OnSaveAs(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
@@ -35,7 +37,7 @@ public:
     void RandomizeGrid(int seed);
     void SaveToFile(const wxString& filename);
     void LoadFromFile(const wxString& filename);
-    void ImportFromFile(const wxString& filename); // New method for importing
+    void ImportFromFile(const wxString& filename);
 
     int GetLivingNeighbors(int row, int col);
     void NextGeneration();
