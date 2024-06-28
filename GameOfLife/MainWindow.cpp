@@ -6,7 +6,9 @@
 #include "trash.xpm"
 #include <ctime>
 #include <cstdlib>
-#include <wx/numdlg.h> // Include for number dialog
+#include <wx/numdlg.h>
+#include <wx/filedlg.h>
+#include <wx/textfile.h>
 
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
 EVT_SIZE(MainWindow::OnSizeChange)
@@ -16,8 +18,15 @@ EVT_MENU(10003, MainWindow::OnNext)
 EVT_MENU(10004, MainWindow::OnClear)
 EVT_MENU(10006, MainWindow::OnMenuSettings)
 EVT_MENU(10007, MainWindow::OnToggleShowNeighborCount)
-EVT_MENU(10008, MainWindow::OnRandomize)            // Event for randomize
-EVT_MENU(10009, MainWindow::OnRandomizeWithSeed)    // Event for randomize with seed
+EVT_MENU(10008, MainWindow::OnRandomize)
+EVT_MENU(10009, MainWindow::OnRandomizeWithSeed)
+EVT_MENU(10010, MainWindow::OnSave)
+EVT_MENU(10011, MainWindow::OnOpen) // Corrected to OnOpen
+EVT_MENU(10012, MainWindow::OnNew)
+EVT_MENU(10013, MainWindow::OnOpen)
+EVT_MENU(10014, MainWindow::OnSave)
+EVT_MENU(10015, MainWindow::OnSaveAs)
+EVT_MENU(10016, MainWindow::OnExit)
 EVT_TIMER(10005, MainWindow::OnTimer)
 wxEND_EVENT_TABLE()
 
@@ -51,17 +60,28 @@ MainWindow::MainWindow()
     // Create the menu bar
     menuBar = new wxMenuBar();
 
+    // Create the file menu
+    fileMenu = new wxMenu();
+    fileMenu->Append(10012, "New");
+    fileMenu->Append(10013, "Open");
+    fileMenu->Append(10014, "Save");
+    fileMenu->Append(10015, "Save As");
+    fileMenu->Append(10016, "Exit");
+
     // Create the options menu
     optionsMenu = new wxMenu();
     optionsMenu->Append(10006, "Settings");
-    optionsMenu->Append(10008, "Randomize");            // Add randomize option
-    optionsMenu->Append(10009, "Randomize with Seed");  // Add randomize with seed option
+    optionsMenu->Append(10008, "Randomize");
+    optionsMenu->Append(10009, "Randomize with Seed");
+    optionsMenu->Append(10010, "Save");
+    optionsMenu->Append(10011, "Load");
 
     // Create the view menu
     viewMenu = new wxMenu();
     viewMenu->AppendCheckItem(10007, "Show Neighbor Count");
 
-    // Add the options and view menus to the menu bar
+    // Add the file, options, and view menus to the menu bar
+    menuBar->Append(fileMenu, "File");
     menuBar->Append(optionsMenu, "Options");
     menuBar->Append(viewMenu, "View");
 
@@ -140,6 +160,109 @@ void MainWindow::RandomizeGrid(int seed)
     generationCount = 0;
     UpdateStatusBar();
     drawingPanel->Refresh();
+}
+
+void MainWindow::OnSave(wxCommandEvent& event)
+{
+    if (currentFileName.IsEmpty())
+    {
+        OnSaveAs(event);
+    }
+    else
+    {
+        SaveToFile(currentFileName);
+    }
+}
+
+void MainWindow::OnSaveAs(wxCommandEvent& event)
+{
+    wxFileDialog saveFileDialog(this, _("Save CELLS file"), "", "",
+        "CELLS files (*.cells)|*.cells", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+    currentFileName = saveFileDialog.GetPath();
+    SaveToFile(currentFileName);
+}
+
+void MainWindow::OnOpen(wxCommandEvent& event)
+{
+    wxFileDialog openFileDialog(this, _("Open CELLS file"), "", "",
+        "CELLS files (*.cells)|*.cells", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+    if (openFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+    LoadFromFile(openFileDialog.GetPath());
+}
+
+void MainWindow::OnNew(wxCommandEvent& event)
+{
+    currentFileName.Clear();
+    OnClear(event);
+}
+
+void MainWindow::OnExit(wxCommandEvent& event)
+{
+    Close(true);
+}
+
+void MainWindow::SaveToFile(const wxString& filename)
+{
+    wxTextFile file;
+    if (file.Create(filename) || file.Open(filename))
+    {
+        file.Clear();
+
+        file.AddLine("! Game of Life save file");
+
+        for (const auto& row : gameBoard)
+        {
+            wxString line;
+            for (bool cell : row)
+            {
+                line += (cell ? '*' : '.');
+            }
+            file.AddLine(line);
+        }
+
+        file.Write();
+        file.Close();
+    }
+}
+
+void MainWindow::LoadFromFile(const wxString& filename)
+{
+    wxTextFile file;
+    if (file.Open(filename))
+    {
+        gameBoard.clear();
+
+        for (wxString str = file.GetFirstLine(); !file.Eof(); str = file.GetNextLine())
+        {
+            if (str[0] == '!')
+                continue;
+
+            std::vector<bool> row;
+            for (char ch : str.ToStdString())
+            {
+                if (ch == '*')
+                    row.push_back(true);
+                else if (ch == '.')
+                    row.push_back(false);
+            }
+            gameBoard.push_back(row);
+        }
+
+        int newGridSize = gameBoard.size() > 0 ? gameBoard[0].size() : 0;
+        settings.gridSize = newGridSize;
+        InitializeGrid();
+
+        generationCount = 0;
+        UpdateStatusBar();
+        drawingPanel->Refresh();
+    }
 }
 
 void MainWindow::OnSizeChange(wxSizeEvent& event)
