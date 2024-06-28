@@ -30,8 +30,9 @@ EVT_MENU(10016, MainWindow::OnExit)
 EVT_MENU(10017, MainWindow::OnFinite)
 EVT_MENU(10018, MainWindow::OnToroidal)
 EVT_MENU(10019, MainWindow::OnResetSettings)
-EVT_MENU(10020, MainWindow::OnToggleShowGrid) // New event for Show Grid
-EVT_MENU(10021, MainWindow::OnToggleShow10x10Grid) // New event for Show 10x10 Grid
+EVT_MENU(10020, MainWindow::OnToggleShowGrid)
+EVT_MENU(10021, MainWindow::OnToggleShow10x10Grid)
+EVT_MENU(10022, MainWindow::OnToggleShowHUD) // New event for Show HUD
 EVT_TIMER(10005, MainWindow::OnTimer)
 wxEND_EVENT_TABLE()
 
@@ -93,8 +94,9 @@ MainWindow::MainWindow()
     toroidalMenuItem->Check(settings.universeType == UniverseType::Toroidal);
 
     viewMenu->AppendCheckItem(10007, "Show Neighbor Count");
-    viewMenu->AppendCheckItem(10020, "Show Grid"); // Add Show Grid option
-    viewMenu->AppendCheckItem(10021, "Show 10x10 Grid"); // Add Show 10x10 Grid option
+    viewMenu->AppendCheckItem(10020, "Show Grid");
+    viewMenu->AppendCheckItem(10021, "Show 10x10 Grid");
+    viewMenu->AppendCheckItem(10022, "Show HUD"); // Add Show HUD option
 
     // Add the file, options, and view menus to the menu bar
     menuBar->Append(fileMenu, "File");
@@ -111,6 +113,7 @@ MainWindow::MainWindow()
     viewMenu->Check(10007, settings.showNeighborCount);
     viewMenu->Check(10020, settings.showGrid);
     viewMenu->Check(10021, settings.show10x10Grid);
+    viewMenu->Check(10022, settings.showHUD);
 
     timer = new wxTimer(this, 10005);
 }
@@ -159,6 +162,13 @@ void MainWindow::OnToggleShowGrid(wxCommandEvent& event)
 void MainWindow::OnToggleShow10x10Grid(wxCommandEvent& event)
 {
     settings.show10x10Grid = !settings.show10x10Grid;
+    settings.Save();
+    drawingPanel->Refresh();
+}
+
+void MainWindow::OnToggleShowHUD(wxCommandEvent& event)
+{
+    settings.showHUD = !settings.showHUD;
     settings.Save();
     drawingPanel->Refresh();
 }
@@ -278,6 +288,7 @@ void MainWindow::OnResetSettings(wxCommandEvent& event)
     viewMenu->Check(10007, settings.showNeighborCount);
     viewMenu->Check(10020, settings.showGrid);
     viewMenu->Check(10021, settings.show10x10Grid);
+    viewMenu->Check(10022, settings.showHUD);
 }
 
 void MainWindow::SaveToFile(const wxString& filename)

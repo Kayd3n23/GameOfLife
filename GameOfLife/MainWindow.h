@@ -21,8 +21,9 @@ public:
     void OnClear(wxCommandEvent& event);
     void OnMenuSettings(wxCommandEvent& event);
     void OnToggleShowNeighborCount(wxCommandEvent& event);
-    void OnToggleShowGrid(wxCommandEvent& event); // New event handler for Show Grid
-    void OnToggleShow10x10Grid(wxCommandEvent& event); // New event handler for Show 10x10 Grid
+    void OnToggleShowGrid(wxCommandEvent& event);
+    void OnToggleShow10x10Grid(wxCommandEvent& event);
+    void OnToggleShowHUD(wxCommandEvent& event);
     void OnRandomize(wxCommandEvent& event);
     void OnRandomizeWithSeed(wxCommandEvent& event);
     void OnNew(wxCommandEvent& event);
@@ -42,6 +43,10 @@ public:
     int GetLivingNeighbors(int row, int col);
     void NextGeneration();
     void OnTimer(wxTimerEvent& event);
+
+    // Add getter methods
+    int GetGenerationCount() const { return generationCount; }
+    int GetLivingCellsCount() const { return livingCellsCount; }
 
 private:
     DrawingPanel* drawingPanel;

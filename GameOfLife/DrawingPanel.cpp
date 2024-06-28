@@ -1,26 +1,26 @@
 #include "DrawingPanel.h"
-#include "wx/graphics.h"
-#include "wx/dcbuffer.h"
+#include "GameSettings.h"
+#include "MainWindow.h"  // Include MainWindow header
+#include <wx/graphics.h>
+#include <wx/dcbuffer.h>
 
-wxBEGIN_EVENT_TABLE(DrawingPanel, wxPanel)
-EVT_PAINT(DrawingPanel::OnPaint)
-EVT_LEFT_UP(DrawingPanel::OnMouseUp) // Bind mouse up event
-wxEND_EVENT_TABLE()
-
-DrawingPanel::DrawingPanel(wxWindow* parent, std::vector<std::vector<bool>>& gameBoard, const std::vector<std::vector<int>>& neighborCounts)
-    : wxPanel(parent), gameBoard(gameBoard), neighborCounts(neighborCounts), settings(nullptr), gridSize(15)
+DrawingPanel::DrawingPanel(wxWindow* parent, std::vector<std::vector<bool>>& gameBoard, std::vector<std::vector<int>>& neighborCounts)
+    : wxPanel(parent), gameBoard(gameBoard), neighborCounts(neighborCounts)
 {
     this->SetBackgroundStyle(wxBG_STYLE_PAINT);
-}
-
-void DrawingPanel::SetSettings(Settings* settings)
-{
-    this->settings = settings;
+    this->Bind(wxEVT_PAINT, &DrawingPanel::OnPaint, this);
+    this->Bind(wxEVT_LEFT_UP, &DrawingPanel::OnMouseUp, this);
 }
 
 void DrawingPanel::SetGridSize(int gridSize)
 {
     this->gridSize = gridSize;
+    Refresh();
+}
+
+void DrawingPanel::SetSettings(Settings* settings)
+{
+    this->settings = settings;
 }
 
 void DrawingPanel::OnPaint(wxPaintEvent& event)
@@ -30,42 +30,85 @@ void DrawingPanel::OnPaint(wxPaintEvent& event)
 
     wxGraphicsContext* context = wxGraphicsContext::Create(dc);
     if (!context)
-    {
         return;
-    }
 
-    context->SetPen(*wxBLACK);
+    int cellWidth = GetSize().GetWidth() / gridSize;
+    int cellHeight = GetSize().GetHeight() / gridSize;
 
-    wxSize size = GetClientSize();
-    int cellWidth = size.GetWidth() / gridSize;
-    int cellHeight = size.GetHeight() / gridSize;
+    context->SetPen(wxPen(settings->showGrid ? *wxBLACK : wxNullPen));
+    context->SetBrush(wxBrush(*wxWHITE));
+    dc.SetPen(settings->showGrid ? wxPen(wxColor(0, 0, 0, 64)) : wxNullPen);
 
     for (int row = 0; row < gridSize; ++row)
     {
         for (int col = 0; col < gridSize; ++col)
         {
+            int x = col * cellWidth;
+            int y = row * cellHeight;
+
             if (gameBoard[row][col])
             {
-                context->SetBrush(settings->GetLivingCellColor());
+                context->SetBrush(wxBrush(settings->GetLivingCellColor()));
             }
             else
             {
-                context->SetBrush(settings->GetDeadCellColor());
+                context->SetBrush(wxBrush(settings->GetDeadCellColor()));
             }
 
-            int x = col * cellWidth;
-            int y = row * cellHeight;
             context->DrawRectangle(x, y, cellWidth, cellHeight);
 
             if (settings->showNeighborCount && neighborCounts[row][col] > 0)
             {
+                context->SetFont(wxFontInfo(16), *wxRED);
                 wxString text = wxString::Format("%d", neighborCounts[row][col]);
                 double textWidth, textHeight;
-                context->SetFont(wxFontInfo(16), *wxRED);
                 context->GetTextExtent(text, &textWidth, &textHeight);
                 context->DrawText(text, x + (cellWidth - textWidth) / 2, y + (cellHeight - textHeight) / 2);
             }
         }
+    }
+
+    if (settings->showGrid)
+    {
+        for (int i = 1; i < gridSize; ++i)
+        {
+            int x = i * cellWidth;
+            int y = i * cellHeight;
+
+            dc.DrawLine(wxPoint(x, 0), wxPoint(x, GetSize().GetHeight()));
+            dc.DrawLine(wxPoint(0, y), wxPoint(GetSize().GetWidth(), y));
+        }
+
+        if (settings->show10x10Grid)
+        {
+            int solidLines = gridSize / 10;
+
+            dc.SetPen(wxPen(*wxBLACK, 2));
+
+            for (int i = 1; i <= solidLines; ++i)
+            {
+                int x = i * cellWidth * 10;
+                int y = i * cellHeight * 10;
+
+                dc.DrawLine(wxPoint(x, 0), wxPoint(x, GetSize().GetHeight()));
+                dc.DrawLine(wxPoint(0, y), wxPoint(GetSize().GetWidth(), y));
+            }
+        }
+    }
+
+    if (settings->showHUD)
+    {
+        MainWindow* mainWindow = dynamic_cast<MainWindow*>(GetParent());
+        context->SetFont(wxFontInfo(14), *wxRED);
+        wxString hudText = wxString::Format("Generations: %d\nLiving Cells: %d\nBoundary: %s\nUniverse Size: %dx%d",
+            mainWindow->GetGenerationCount(),
+            mainWindow->GetLivingCellsCount(),
+            settings->universeType == UniverseType::Finite ? "Finite" : "Toroidal",
+            settings->gridSize, settings->gridSize);
+
+        double textWidth, textHeight;
+        context->GetTextExtent(hudText, &textWidth, &textHeight);
+        context->DrawText(hudText, 10, GetSize().GetHeight() - textHeight - 10);
     }
 
     delete context;
@@ -73,19 +116,18 @@ void DrawingPanel::OnPaint(wxPaintEvent& event)
 
 void DrawingPanel::OnMouseUp(wxMouseEvent& event)
 {
-    if (!settings) return;
+    int x = event.GetX();
+    int y = event.GetY();
 
-    wxPoint pos = event.GetPosition();
-    wxSize size = GetClientSize();
-    int cellWidth = size.GetWidth() / gridSize;
-    int cellHeight = size.GetHeight() / gridSize;
+    int cellWidth = GetSize().GetWidth() / gridSize;
+    int cellHeight = GetSize().GetHeight() / gridSize;
 
-    int col = pos.x / cellWidth;
-    int row = pos.y / cellHeight;
+    int col = x / cellWidth;
+    int row = y / cellHeight;
 
-    if (col >= 0 && col < gridSize && row >= 0 && row < gridSize)
+    if (row >= 0 && row < gridSize && col >= 0 && col < gridSize)
     {
-        gameBoard[row][col] = !gameBoard[row][col]; // Toggle cell state
+        gameBoard[row][col] = !gameBoard[row][col];
         Refresh();
     }
 }

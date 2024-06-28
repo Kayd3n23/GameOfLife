@@ -5,23 +5,25 @@
 #include "GameSettings.h"
 #include <vector>
 
+// Forward declaration of MainWindow class
+class MainWindow;
+
 class DrawingPanel : public wxPanel
 {
 public:
-    DrawingPanel(wxWindow* parent, std::vector<std::vector<bool>>& gameBoard, const std::vector<std::vector<int>>& neighborCounts);
-    void SetSettings(Settings* settings);
+    DrawingPanel(wxWindow* parent, std::vector<std::vector<bool>>& gameBoard, std::vector<std::vector<int>>& neighborCounts);
+
     void SetGridSize(int gridSize);
+    void SetSettings(Settings* settings);
 
 private:
     void OnPaint(wxPaintEvent& event);
-    void OnMouseUp(wxMouseEvent& event); // Mouse event handler
-    std::vector<std::vector<bool>>& gameBoard; // Make gameBoard modifiable
-    const std::vector<std::vector<int>>& neighborCounts;
-    Settings* settings;
+    void OnMouseUp(wxMouseEvent& event);
 
+    std::vector<std::vector<bool>>& gameBoard;
+    std::vector<std::vector<int>>& neighborCounts;
     int gridSize;
-
-    wxDECLARE_EVENT_TABLE();
+    Settings* settings;
 };
 
 #endif // DRAWINGPANEL_H
