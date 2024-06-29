@@ -17,7 +17,7 @@ void DrawingPanel::SetGridSize(int gridSize)
     this->gridSize = gridSize;
     Refresh();
 }
-
+ 
 void DrawingPanel::SetSettings(Settings* settings)
 {
     this->settings = settings;
